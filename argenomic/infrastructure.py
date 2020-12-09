@@ -108,7 +108,7 @@ class arbiter:
     """
     def __init__(self, arbiter_config) -> None:
         self.rules_dict = pd.read_csv(hydra.utils.to_absolute_path("data/smarts/alert_collection.csv"))
-        self.rules_dict= self.rules_dict[self.rules_dict.rule_set_name.isin(arbiter_config.rules)]
+        self.rules_dict = self.rules_dict[self.rules_dict.rule_set_name.isin(arbiter_config.rules)]
         self.rules_list = self.rules_dict["smarts"].values.tolist()
         self.tolerance_list = pd.to_numeric(self.rules_dict["max"]).values.tolist()
         self.pattern_list = [Chem.MolFromSmarts(smarts) for smarts in self.rules_list]
