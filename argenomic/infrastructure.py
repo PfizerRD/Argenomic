@@ -109,7 +109,7 @@ class arbiter:
     """
     def __init__(self) -> None:
         self.rules_dict = pd.read_csv(os.path.join(config['root_dir'], "data/smarts/alert_collection.csv"))
-        picked_rules = list(config['arbiter']['rules']) if len(config['arbiter']['rules']) == 1 \
+        picked_rules = list(config['arbiter']['rules']) if isinstance(config['arbiter']['rules'], 'str') \
                                                          else config['arbiter']['rules']
         self.rules_dict = self.rules_dict[self.rules_dict.rule_set_name.isin(picked_rules)]
         self.rules_list = self.rules_dict["smarts"].values.tolist()
