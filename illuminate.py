@@ -1,5 +1,7 @@
+import os
 import pandas as pd
 from typing import List, Tuple
+import pprint
 
 from rdkit import Chem
 from rdkit.Chem import PandasTools as pdtl
@@ -21,10 +23,10 @@ class illumination:
 
         self.mutator = mutator()
         self.crossover = crossover()
-        self.arbiter = arbiter(config['arbiter'])
-        self.descriptor = descriptor(config['descriptor'])
-        self.archive = archive(config)
-        self.fitness = fitness(config['fitness'])
+        self.arbiter = arbiter()
+        self.descriptor = descriptor()
+        self.archive = archive()
+        self.fitness = fitness()
 
         self.client = Client(n_workers=config['workers'], threads_per_worker=config['threads'])
 
@@ -38,7 +40,7 @@ class illumination:
             self.archive.store_archive(generation)
 
     def initial_population(self) -> None:
-        dataframe = pd.read_csv(self.data_file)
+        dataframe = pd.read_csv(os.path.join(config['root_dir'], self.data_file))
         pdtl.AddMoleculeColumnToFrame(dataframe, 'smiles', 'molecule')
         molecules = dataframe['molecule'].sample(n=self.initial_size).tolist()
         molecules = self.arbiter(self.unique_molecules(molecules))
@@ -73,12 +75,9 @@ class illumination:
         return molecule_dataframe['molecules']
 
 
-@hydra.main(config_path="configuration", config_name="config.yaml")
-def launch(config) -> None:
-    print(config.pretty())
+if __name__ == "__main__":
+    pp = pprint.PrettyPrinter(indent=4)
+    pp.pprint(config)
     current_instance = illumination(config)
     current_instance()
     current_instance.client.close()
-
-if __name__ == "__main__":
-    launch()

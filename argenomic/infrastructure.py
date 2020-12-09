@@ -17,7 +17,7 @@ from rdkit.Chem import AllChem
 rdBase.DisableLog('rdApp.error')
 from rdkit.Chem import Lipinski
 
-from ..configuration.config import config
+from configuration.config import config
 
 
 class elite():
@@ -35,12 +35,12 @@ class elite():
         return None
 
 class archive:
-    def __init__(self, config) -> None:
+    def __init__(self) -> None:
         self.archive_size = config['archive']['size']
         self.archive_accuracy = config['archive']['accuracy']
         self.archive_dimensions = len(config['descriptor']['properties'])
         self.cache_string = "cache_{}_{}.csv".format(self.archive_dimensions, self.archive_accuracy)
-        self.cvt_location = os.path.join("../data/cvt/", self.cache_string)
+        self.cvt_location = os.path.join(config['root_dir'], "data/cvt/", self.cache_string)
         if os.path.isfile(self.cvt_location):
             self.cvt_centers = np.loadtxt(self.cvt_location)
         else:
@@ -107,9 +107,11 @@ class arbiter:
     A catalog class containing different druglike filters for small molecules.
     Includes the option to run the structural filters from ChEMBL.
     """
-    def __init__(self, config) -> None:
-        self.rules_dict = pd.read_csv("../data/smarts/alert_collection.csv")
-        self.rules_dict = self.rules_dict[self.rules_dict.rule_set_name.isin(config['arbiter']['rules'])]
+    def __init__(self) -> None:
+        self.rules_dict = pd.read_csv(os.path.join(config['root_dir'], "data/smarts/alert_collection.csv"))
+        picked_rules = list(config['arbiter']['rules']) if isinstance(config['arbiter']['rules'], str) \
+                                                         else config['arbiter']['rules']
+        self.rules_dict = self.rules_dict[self.rules_dict.rule_set_name.isin(picked_rules)]
         self.rules_list = self.rules_dict["smarts"].values.tolist()
         self.tolerance_list = pd.to_numeric(self.rules_dict["max"]).values.tolist()
         self.pattern_list = [Chem.MolFromSmarts(smarts) for smarts in self.rules_list]
