@@ -18,14 +18,16 @@ from rdkit.Chem import rdMolDescriptors
 from rdkit.Chem.rdmolfiles import MolToSmiles
 from rdkit.DataStructs.cDataStructs import TanimotoSimilarity
 
+from ..configuration.config import config
+
 class descriptor:
     """
     A strategy class for calculating the descriptor vector of a molecule.
     """
-    def __init__(self, config_descriptor) -> None:
+    def __init__(self, config) -> None:
         self.properties = []
-        self.ranges = config_descriptor.ranges
-        self.property_names = config_descriptor.properties
+        self.ranges = config['descriptor']['ranges']
+        self.property_names = config['descriptor']['properties']
         for name in self.property_names:
             if "." in name:
                 module, fuction = name.split(".")

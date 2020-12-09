@@ -1,4 +1,3 @@
-import hydra
 import pandas as pd
 from typing import List, Tuple
 
@@ -11,23 +10,23 @@ from dask.distributed import Client
 from argenomic.operations import crossover, mutator
 from argenomic.mechanism import descriptor, fitness
 from argenomic.infrastructure import archive, arbiter
+from configuration.config import config
 
 class illumination:
     def __init__(self, config) -> None:
-        self.data_file = config.data_file
-        self.batch_size = config.batch_size
-        self.initial_size = config.initial_size
-        self.generations = config.generations
+        self.data_file = config['data_file']
+        self.batch_size = config['batch_size']
+        self.initial_size = config['initial_size']
+        self.generations = config['generations']
 
         self.mutator = mutator()
         self.crossover = crossover()
-        self.arbiter = arbiter(config.arbiter)
-        self.descriptor = descriptor(config.descriptor)
-        self.archive = archive(config.archive, config.descriptor)
-        self.fitness = fitness(config.fitness)
+        self.arbiter = arbiter(config['arbiter'])
+        self.descriptor = descriptor(config['descriptor'])
+        self.archive = archive(config)
+        self.fitness = fitness(config['fitness'])
 
-        self.client = Client(n_workers=config.workers, threads_per_worker=config.threads)
-        return None
+        self.client = Client(n_workers=config['workers'], threads_per_worker=config['threads'])
 
     def __call__(self) -> None:
         self.initial_population()
@@ -37,16 +36,14 @@ class illumination:
             self.archive.add_to_archive(molecules, descriptors, fitnesses)
             self.archive.store_statistics(generation)
             self.archive.store_archive(generation)
-        return None
 
     def initial_population(self) -> None:
-        dataframe = pd.read_csv(hydra.utils.to_absolute_path(self.data_file))
+        dataframe = pd.read_csv(self.data_file)
         pdtl.AddMoleculeColumnToFrame(dataframe, 'smiles', 'molecule')
         molecules = dataframe['molecule'].sample(n=self.initial_size).tolist()
         molecules = self.arbiter(self.unique_molecules(molecules))
         molecules, descriptors, fitnesses = self.process_molecules(molecules)
         self.archive.add_to_archive(molecules, descriptors, fitnesses)
-        return None
 
     def generate_molecules(self) -> None:
         molecules = []
@@ -72,7 +69,7 @@ class illumination:
         molecules = [Chem.MolFromSmiles(Chem.MolToSmiles(molecule)) for molecule in molecules if molecule is not None]
         molecule_records = [(molecule, Chem.MolToSmiles(molecule)) for molecule in molecules if molecule is not None]
         molecule_dataframe = pd.DataFrame(molecule_records, columns = ['molecules', 'smiles'])
-        molecule_dataframe.drop_duplicates('smiles', inplace = True)
+        molecule_dataframe.drop_duplicates('smiles', inplace=True)
         return molecule_dataframe['molecules']
 
 
