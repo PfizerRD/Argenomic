@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 from typing import List, Tuple
 import pprint
@@ -39,7 +40,7 @@ class illumination:
             self.archive.store_archive(generation)
 
     def initial_population(self) -> None:
-        dataframe = pd.read_csv(self.data_file)
+        dataframe = pd.read_csv(os.path.join(config['root_dir'], self.data_file))
         pdtl.AddMoleculeColumnToFrame(dataframe, 'smiles', 'molecule')
         molecules = dataframe['molecule'].sample(n=self.initial_size).tolist()
         molecules = self.arbiter(self.unique_molecules(molecules))

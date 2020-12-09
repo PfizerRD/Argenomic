@@ -1,4 +1,7 @@
+import os
+
 config = {
+    'root_dir': os.path.join("..", os.path.dirname(os.path.realpath(__file__))) ,
     'data_file': "data/smiles/guacamol_initial_rediscovery_ref_1.smi",
     'batch_size': 40,
     'initial_size': 100,
