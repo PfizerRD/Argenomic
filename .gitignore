@@ -2,3 +2,4 @@ data/sdf/ref_1_single_conf.sdf
 argenomic/__pycache__/infrastructure.cpython-36.pyc
 argenomic/__pycache__/mechanism.cpython-36.pyc
 argenomic/__pycache__/operations.cpython-37.pyc
+data/smiles/guacamol_initial_rediscovery_ref_1.smi
