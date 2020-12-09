@@ -11,7 +11,7 @@ config = {
         'accuracy': 25000
     },
     'descriptor': {
-        'properties': "ROCS",
+        'properties': ["ROCS"],
         'ranges': [0, 2]
     },
     'spec_params': {
