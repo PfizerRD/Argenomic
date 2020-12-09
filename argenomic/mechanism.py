@@ -18,7 +18,7 @@ from rdkit.Chem import rdMolDescriptors
 from rdkit.Chem.rdmolfiles import MolToSmiles
 from rdkit.DataStructs.cDataStructs import TanimotoSimilarity
 
-from ..configuration.config import config
+from configuration.config import config
 
 class descriptor:
     """

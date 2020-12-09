@@ -17,7 +17,7 @@ from rdkit.Chem import AllChem
 rdBase.DisableLog('rdApp.error')
 from rdkit.Chem import Lipinski
 
-from ..configuration.config import config
+from configuration.config import config
 
 
 class elite():
