@@ -58,24 +58,24 @@ class fitness:
     """
     A strategy class for calculating the fitness of a molecule.
     """
-    def __init__(self, config_fitness, config_spec_params=None) -> None:
+    def __init__(self, config) -> None:
         self.memoized_cache = dict()
-        if 'CFP' in config_fitness.type:
-            self.fingerprint_type = config_fitness.type
-            self.target = Chem.MolFromSmiles(config_fitness.target)
+        if 'CFP' in config['fitness']['type']:
+            self.fingerprint_type = config['fitness']['type']
+            self.target = Chem.MolFromSmiles(config['fitness']['target'])
             self.target_fingerprint = self.get_fingerprint(self.target, self.fingerprint_type)
-        elif 'ROCS' in config_fitness.type:
+        elif 'ROCS' in config['fitness']['type']:
             self.param_dict = {
-                'rocs_type': config_spec_params.rocs_type,
-                'max_confs': config_spec_params.max_confs,
-                'max_centers': config_spec_params.max_centers,
-                'force_flip': config_spec_params.force_flip,
-                'enum_nitrogen': config_spec_params.enum_nitrogen,
+                'rocs_type': config['spec_params']['rocs_type'],
+                'max_confs': config['spec_params']['max_confs'],
+                'max_centers': config['spec_params']['max_centers'],
+                'force_flip': config['spec_params']['force_flip'],
+                'enum_nitrogen': config['spec_params']['enum_nitrogen'],
             }
             omegaOpts = oeomega.OEOmegaOptions()
             omegaOpts.SetMaxConfs(self.param_dict['max_confs'])
             self._omega = oeomega.OEOmega(omegaOpts)
-            self._ref_overlay = self._calc_ref_overlay(config_fitness.target)
+            self._ref_overlay = self._calc_ref_overlay(config['fitness']['target'])
         return None
 
     def __call__(self, molecule: Chem.Mol) -> float:
