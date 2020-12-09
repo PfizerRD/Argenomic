@@ -1,5 +1,6 @@
 import pandas as pd
 from typing import List, Tuple
+import pprint
 
 from rdkit import Chem
 from rdkit.Chem import PandasTools as pdtl
@@ -73,12 +74,9 @@ class illumination:
         return molecule_dataframe['molecules']
 
 
-@hydra.main(config_path="configuration", config_name="config.yaml")
-def launch(config) -> None:
-    print(config.pretty())
+if __name__ == "__main__":
+    pp = pprint.PrettyPrinter(indent=4)
+    pp.pprint(config)
     current_instance = illumination(config)
     current_instance()
     current_instance.client.close()
-
-if __name__ == "__main__":
-    launch()
