@@ -35,7 +35,7 @@ class elite():
         return None
 
 class archive:
-    def __init__(self): #, config) -> None:
+    def __init__(self) -> None:
         self.archive_size = config['archive']['size']
         self.archive_accuracy = config['archive']['accuracy']
         self.archive_dimensions = len(config['descriptor']['properties'])
@@ -107,7 +107,7 @@ class arbiter:
     A catalog class containing different druglike filters for small molecules.
     Includes the option to run the structural filters from ChEMBL.
     """
-    def __init__(self): #, config) -> None:
+    def __init__(self) -> None:
         self.rules_dict = pd.read_csv(os.path.join(config['root_dir'], "data/smarts/alert_collection.csv"))
         self.rules_dict = self.rules_dict[self.rules_dict.rule_set_name.isin(config['arbiter']['rules'])]
         self.rules_list = self.rules_dict["smarts"].values.tolist()

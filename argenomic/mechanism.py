@@ -24,7 +24,7 @@ class descriptor:
     """
     A strategy class for calculating the descriptor vector of a molecule.
     """
-    def __init__(self, config) -> None:
+    def __init__(self):
         self.properties = []
         self.ranges = config['descriptor']['ranges']
         self.property_names = config['descriptor']['properties']
@@ -58,7 +58,7 @@ class fitness:
     """
     A strategy class for calculating the fitness of a molecule.
     """
-    def __init__(self, config) -> None:
+    def __init__(self) -> None:
         self.memoized_cache = dict()
         if 'CFP' in config['fitness']['type']:
             self.fingerprint_type = config['fitness']['type']

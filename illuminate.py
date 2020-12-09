@@ -23,10 +23,10 @@ class illumination:
 
         self.mutator = mutator()
         self.crossover = crossover()
-        self.arbiter = arbiter(config['arbiter'])
-        self.descriptor = descriptor(config['descriptor'])
-        self.archive = archive(config)
-        self.fitness = fitness(config['fitness'])
+        self.arbiter = arbiter()
+        self.descriptor = descriptor()
+        self.archive = archive()
+        self.fitness = fitness()
 
         self.client = Client(n_workers=config['workers'], threads_per_worker=config['threads'])
 
