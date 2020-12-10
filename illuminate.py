@@ -1,4 +1,5 @@
 import os
+import sys
 import pandas as pd
 from typing import List, Tuple
 import pprint
@@ -76,6 +77,8 @@ class illumination:
 
 
 if __name__ == "__main__":
+    if config['path_to_remove'] is not None:
+        sys.path.remove(config['path_to_remove'])
     pp = pprint.PrettyPrinter(indent=4)
     pp.pprint(config)
     current_instance = illumination(config)
