@@ -3,20 +3,20 @@ import os
 config = {
     'root_dir': os.path.join(os.path.dirname(os.path.realpath(__file__)), ".."),
     'path_to_remove': "/cm/local/apps/cuda/libs/current/pynvml",
-    'data_file': "data/smiles/guacamol_initial_rediscovery_ref_1.smi",
+    'data_file': "data/smiles/guacamol_initial_rediscovery_ref_3.smi",
     'batch_size': 40,
     'initial_size': 100,
     'workers': 1,
     'threads': 2,
     'generations': 75,
     'archive': {
-        'name': "ref_1",
+        'name': "ref_3",
         'size': 150,
         'accuracy': 25000
     },
     'descriptor': {
-        'properties': ["ROCS"],
-        'ranges': [0, 2]
+        'properties': ["Descriptors.ExactMolWt"],
+        'ranges': [225, 555]
     },
     'spec_params': {
         'rocs_type': "shape_and_color",
@@ -26,7 +26,7 @@ config = {
         'enum_nitrogen': True
     },
     'fitness': {
-        'target': "data/sdf/ref_1_single_conf.sdf",
+        'target': "data/sdf/fastrocs_Ref_3.sdf",
         'type': "ROCS_3D"
     },
     'arbiter': {
