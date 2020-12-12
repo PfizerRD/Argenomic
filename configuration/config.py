@@ -16,7 +16,7 @@ config = {
     },
     'descriptor': {
         'properties': ["Descriptors.ExactMolWt"],
-        'ranges': [225, 555]
+        'ranges': [[225, 555]]
     },
     'spec_params': {
         'rocs_type': "shape_and_color",

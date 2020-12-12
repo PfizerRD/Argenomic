@@ -42,16 +42,16 @@ class descriptor:
         Calculating the descriptor vector of a molecule.
         """
         descriptor = []
-        for property, range in zip(self.properties, self.ranges):
-            descriptor.append(self.rescale(property(molecule), range))
+        for property, range_f in zip(self.properties, self.ranges):
+            descriptor.append(self.rescale(property(molecule), range_f))
         return descriptor
 
     @staticmethod
-    def rescale(feature: List[float], range: List[float]) -> List[float]:
+    def rescale(feature: List[float], range_f: List[float]) -> List[float]:
         """
         Rescaling the feature to the unit range.
         """
-        rescaled_feature = (feature - range[0])/(range[1] - range[0])
+        rescaled_feature = (feature - range_f[0])/(range_f[1] - range_f[0])
         return rescaled_feature
 
 class fitness:
