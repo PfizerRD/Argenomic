@@ -2,6 +2,7 @@ import sys
 import numpy as np
 import pandas as pd
 from typing import List, Tuple
+import time
 
 from openeye import oechem, oeshape, oeomega
 
@@ -80,16 +81,20 @@ class fitness:
 
     def __call__(self, molecule: Chem.Mol) -> float:
         #print("Molecule,SMILES,ROCS_Score,Time", flush=True)
+        start_time = time.time()
+        time_taken = 0
         fit_smi = MolToSmiles(molecule)
         try:
             if fit_smi in self.memoized_cache:
                 fitness_score = self.memoized_cache[fit_smi]
             else:
-                fit_list = self._get_enantiomers_from_smi(fit_smi)
-                fitness_score = self._calc_rocs_score(fit_list)
+                fit_confs = self._get_enantiomers_from_smi(fit_smi)
+                fitness_score = self._calc_rocs_score(fit_confs)
                 self.memoized_cache[fit_smi] = fitness_score
+                time_taken = time.time() - start_time
         except:
             fitness_score = 0
+        print("{},{},{}".format(fit_smi, round(fitness_score, 2), round(time_taken, 1)), flush=True)
         return fitness_score
 
     def get_fingerprint(self, molecule: Chem.Mol, fingerprint_type: str):
@@ -153,13 +158,13 @@ class fitness:
             raise ValueError("Unable to build enantiomers!")       
         return mol_list
 
-    def _calc_rocs_score(self, fit_list):
+    def _calc_rocs_score(self, fit_confs):
         best_score = -np.inf
         # available options: "shape_only" or "shape_and_color"
         rocs_type = self.param_dict['rocs_type']
         try:
             overlay = self._ref_overlay
-            for fitmol in fit_list:
+            for fitmol in fit_confs:
                 prep = oeshape.OEOverlapPrep()
                 prep.Prep(fitmol)
                 score = oeshape.OEBestOverlayScore()
@@ -172,5 +177,4 @@ class fitness:
                     raise ValueError("Invalid ROCS score type!")
         except:
             raise ValueError("Unable to calculate ROCS score!")
-        return best_score
-
+        return max(0, best_score)
