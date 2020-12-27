@@ -8,7 +8,7 @@ config = {
     'initial_size': 100,
     'workers': 1,
     'threads': 2,
-    'generations': 75,
+    'generations': 1,
     'archive': {
         'name': "ref_3",
         'size': 150,
