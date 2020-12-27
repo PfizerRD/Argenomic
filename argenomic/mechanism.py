@@ -65,6 +65,7 @@ class fitness:
             molecule_fingerprint = self.get_fingerprint(molecule, self.fingerprint_type)
             fitness = TanimotoSimilarity(self.target_fingerprint, molecule_fingerprint)
             self.memoized_cache[smiles] = fitness
+        print("{},{}".format(smiles, round(fitness, 3)), flush=True)
         return fitness
 
     def get_fingerprint(self, molecule: Chem.Mol, fingerprint_type: str):
