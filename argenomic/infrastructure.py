@@ -1,5 +1,6 @@
 import os
 import csv
+import hydra
 import random
 import itertools
 
@@ -17,8 +18,6 @@ from rdkit.Chem import AllChem
 rdBase.DisableLog('rdApp.error')
 from rdkit.Chem import Lipinski
 
-from configuration.config import config
-
 
 class elite():
     def __init__(self, index, descriptor):
@@ -35,17 +34,17 @@ class elite():
         return None
 
 class archive:
-    def __init__(self) -> None:
-        self.archive_size = config['archive']['size']
-        self.archive_accuracy = config['archive']['accuracy']
-        self.archive_dimensions = len(config['descriptor']['properties'])
+    def __init__(self, archive_config, descriptor_config) -> None:
+        self.archive_size = archive_config.size
+        self.archive_accuracy = archive_config.accuracy
+        self.archive_dimensions = len(descriptor_config.properties)
         self.cache_string = "cache_{}_{}.csv".format(self.archive_dimensions, self.archive_accuracy)
-        self.cvt_location = os.path.join(config['root_dir'], "data/cvt/", self.cache_string)
+        self.cvt_location = hydra.utils.to_absolute_path("data/cvt/" + self.cache_string)
         if os.path.isfile(self.cvt_location):
             self.cvt_centers = np.loadtxt(self.cvt_location)
         else:
             kmeans = KMeans(n_clusters=self.archive_size)
-            kmeans = kmeans.fit(np.random.rand(config['archive']['accuracy'], self.archive_dimensions))
+            kmeans = kmeans.fit(np.random.rand(archive_config.accuracy, self.archive_dimensions))
             self.cvt_centers = kmeans.cluster_centers_
             np.savetxt(self.cvt_location, self.cvt_centers)
         self.cvt = KDTree(self.cvt_centers, metric='euclidean')
@@ -107,11 +106,9 @@ class arbiter:
     A catalog class containing different druglike filters for small molecules.
     Includes the option to run the structural filters from ChEMBL.
     """
-    def __init__(self) -> None:
-        self.rules_dict = pd.read_csv(os.path.join(config['root_dir'], "data/smarts/alert_collection.csv"))
-        picked_rules = list(config['arbiter']['rules']) if isinstance(config['arbiter']['rules'], str) \
-                                                         else config['arbiter']['rules']
-        self.rules_dict = self.rules_dict[self.rules_dict.rule_set_name.isin(picked_rules)]
+    def __init__(self, arbiter_config) -> None:
+        self.rules_dict = pd.read_csv(hydra.utils.to_absolute_path("data/smarts/alert_collection.csv"))
+        self.rules_dict= self.rules_dict[self.rules_dict.rule_set_name.isin(arbiter_config.rules)]
         self.rules_list = self.rules_dict["smarts"].values.tolist()
         self.tolerance_list = pd.to_numeric(self.rules_dict["max"]).values.tolist()
         self.pattern_list = [Chem.MolFromSmarts(smarts) for smarts in self.rules_list]

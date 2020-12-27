@@ -1,8 +1,6 @@
-import os
-import sys
+import hydra
 import pandas as pd
 from typing import List, Tuple
-import pprint
 
 from rdkit import Chem
 from rdkit.Chem import PandasTools as pdtl
@@ -13,23 +11,23 @@ from dask.distributed import Client
 from argenomic.operations import crossover, mutator
 from argenomic.mechanism import descriptor, fitness
 from argenomic.infrastructure import archive, arbiter
-from configuration.config import config
 
 class illumination:
     def __init__(self, config) -> None:
-        self.data_file = config['data_file']
-        self.batch_size = config['batch_size']
-        self.initial_size = config['initial_size']
-        self.generations = config['generations']
+        self.data_file = config.data_file
+        self.batch_size = config.batch_size
+        self.initial_size = config.initial_size
+        self.generations = config.generations
 
         self.mutator = mutator()
         self.crossover = crossover()
-        self.arbiter = arbiter()
-        self.descriptor = descriptor()
-        self.archive = archive()
-        self.fitness = fitness()
+        self.arbiter = arbiter(config.arbiter)
+        self.descriptor = descriptor(config.descriptor)
+        self.archive = archive(config.archive, config.descriptor)
+        self.fitness = fitness(config.fitness)
 
-        self.client = Client(n_workers=config['workers'], threads_per_worker=config['threads'])
+        self.client = Client(n_workers=config.workers, threads_per_worker=config.threads)
+        return None
 
     def __call__(self) -> None:
         self.initial_population()
@@ -39,14 +37,16 @@ class illumination:
             self.archive.add_to_archive(molecules, descriptors, fitnesses)
             self.archive.store_statistics(generation)
             self.archive.store_archive(generation)
+        return None
 
     def initial_population(self) -> None:
-        dataframe = pd.read_csv(os.path.join(config['root_dir'], self.data_file))
+        dataframe = pd.read_csv(hydra.utils.to_absolute_path(self.data_file))
         pdtl.AddMoleculeColumnToFrame(dataframe, 'smiles', 'molecule')
         molecules = dataframe['molecule'].sample(n=self.initial_size).tolist()
         molecules = self.arbiter(self.unique_molecules(molecules))
         molecules, descriptors, fitnesses = self.process_molecules(molecules)
         self.archive.add_to_archive(molecules, descriptors, fitnesses)
+        return None
 
     def generate_molecules(self) -> None:
         molecules = []
@@ -72,15 +72,16 @@ class illumination:
         molecules = [Chem.MolFromSmiles(Chem.MolToSmiles(molecule)) for molecule in molecules if molecule is not None]
         molecule_records = [(molecule, Chem.MolToSmiles(molecule)) for molecule in molecules if molecule is not None]
         molecule_dataframe = pd.DataFrame(molecule_records, columns = ['molecules', 'smiles'])
-        molecule_dataframe.drop_duplicates('smiles', inplace=True)
+        molecule_dataframe.drop_duplicates('smiles', inplace = True)
         return molecule_dataframe['molecules']
 
 
-if __name__ == "__main__":
-    if config['path_to_remove'] is not None:
-        sys.path.remove(config['path_to_remove'])
-    pp = pprint.PrettyPrinter(indent=4)
-    pp.pprint(config)
+@hydra.main(config_path="configuration", config_name="config.yaml")
+def launch(config) -> None:
+    print(config.pretty())
     current_instance = illumination(config)
     current_instance()
     current_instance.client.close()
+
+if __name__ == "__main__":
+    launch()
