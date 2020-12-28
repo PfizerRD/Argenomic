@@ -79,6 +79,7 @@ class illumination:
         molecules, descriptors = list(molecules), list(descriptors)
         print("calculate fitness of molecuels using dask.bag ...", flush=True)
         fitnesses = bag.map(self.fitness, bag.from_sequence(molecules)).compute()
+        print("FINISHED calculating fitness of molecuels using dask.bag ...", flush=True)
         return molecules, descriptors, fitnesses
 
     @staticmethod
