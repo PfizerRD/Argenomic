@@ -97,7 +97,7 @@ class illumination:
 @hydra.main(config_path="configuration", config_name="config.yaml")
 def launch(config) -> None:
     print(config.pretty())
-    if config.path_to_remove is not None and config.path_to_remove is in sys.path:
+    if config.path_to_remove is not None and config.path_to_remove in sys.path:
         sys.path.remove(config.path_to_remove)
     current_instance = illumination(config)
     current_instance()
