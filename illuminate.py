@@ -28,8 +28,8 @@ class illumination:
         self.fitness = fitness(config.fitness, config.spec_params)
 
         self.client = Client(n_workers=config.workers, threads_per_worker=config.threads,
-                             serializers=['cloudpickle', 'dask', 'pickle'],
-                             deserializers=['cloudpickle', 'dask', 'msgpack'])
+                             serializers=['dask', 'pickle'],
+                             deserializers=['dask', 'msgpack'])
         return None
 
     def __call__(self) -> None:
