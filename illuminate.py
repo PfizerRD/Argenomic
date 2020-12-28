@@ -33,6 +33,7 @@ class illumination:
     def __call__(self) -> None:
         print("initial_population() ...", flush=True)
         self.initial_population()
+        print("FINISHED initial_population() ...", flush=True)
         for generation in range(self.generations):
             print("="*30 + "\nGeneration {}".format(generation+1), flush=True)
             print("SMILES,ROCS_Score,Time", flush=True)
@@ -54,6 +55,7 @@ class illumination:
         molecules = self.arbiter(self.unique_molecules(molecules))
         print("process molecules ...", flush=True)
         molecules, descriptors, fitnesses = self.process_molecules(molecules)
+        print("FINISHED processing molecules ...", flush=True)
         print("add molecules to archive ...", flush=True)
         self.archive.add_to_archive(molecules, descriptors, fitnesses)
         return None
@@ -70,6 +72,7 @@ class illumination:
         return molecules
 
     def process_molecules(self, molecules: List[Chem.Mol]) -> Tuple[List[List[float]],List[float]]:
+        print("="*30 + "\nprocess_molecules\n", flush=True)
         print("calculate descriptors using dask.bag ...", flush=True)
         descriptors = bag.map(self.descriptor, bag.from_sequence(molecules)).compute()
         print("check if all descriptors pass requirements ...", flush=True)
