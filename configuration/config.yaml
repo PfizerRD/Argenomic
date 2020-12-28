@@ -1,32 +1,30 @@
 ---
-data_file: data/smiles/guacamol_initial_rediscovery_thiotixene.smi
+path_to_remove: /cm/local/apps/cuda/libs/current/pynvml
+data_file: data/smiles/guacamol_initial_rediscovery_ref_3.smi
 batch_size: 40
 initial_size: 100
 workers: 1
 threads: 2
 generations: 75
 archive:
-  name: thiotixene
+  name: ref_3
   size: 150
   accuracy: 25000
 descriptor:
   properties:
   - Descriptors.ExactMolWt
-  - Descriptors.MolLogP
-  - Descriptors.TPSA
-  - Crippen.MolMR
   ranges:
   - - 225
     - 555
-  - - -0.5
-    - 5.5
-  - - 0
-    - 140
-  - - 40
-    - 130
+spec_params:
+  rocs_type: shape_and_color
+  max_confs: 75
+  max_centers: 3
+  force_flip: true
+  enum_nitrogen: true
 fitness:
-  target: CN(C)S(=O)(=O)c1ccc2Sc3ccccc3C(=CCCN4CCN(C)CC4)c2c1
-  type: ECFP4
+  target: data/sdf/fastrocs_Ref_3.sdf
+  type: ROCS_3D
 arbiter:
   rules:
   - Glaxo

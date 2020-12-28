@@ -1,3 +1,4 @@
+import sys
 import hydra
 import pandas as pd
 from typing import List, Tuple
@@ -24,7 +25,7 @@ class illumination:
         self.arbiter = arbiter(config.arbiter)
         self.descriptor = descriptor(config.descriptor)
         self.archive = archive(config.archive, config.descriptor)
-        self.fitness = fitness(config.fitness)
+        self.fitness = fitness(config.fitness, config.spec_params)
 
         self.client = Client(n_workers=config.workers, threads_per_worker=config.threads)
         return None
@@ -32,6 +33,8 @@ class illumination:
     def __call__(self) -> None:
         self.initial_population()
         for generation in range(self.generations):
+            print("="*30 + "\nGeneration {}".format(generation+1), flush=True)
+            print("SMILES,ROCS_Score,Time", flush=True)
             molecules = self.generate_molecules()
             molecules, descriptors, fitnesses = self.process_molecules(molecules)
             self.archive.add_to_archive(molecules, descriptors, fitnesses)
@@ -79,6 +82,8 @@ class illumination:
 @hydra.main(config_path="configuration", config_name="config.yaml")
 def launch(config) -> None:
     print(config.pretty())
+    if config.path_to_remove is not None:
+        sys.path.remove(config.path_to_remove)
     current_instance = illumination(config)
     current_instance()
     current_instance.client.close()
