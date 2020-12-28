@@ -77,7 +77,8 @@ class fitness:
     def __call__(self, molecule: Chem.Mol) -> float:
         start_time = time.time()
         time_taken = 0
-        fit_smi = MolToSmiles(molecule)
+        #fit_smi = MolToSmiles(molecule)
+        fit_smi = Chem.MolToSmiles(molecule)
         try:
             if fit_smi in self.memoized_cache:
                 fitness_score = self.memoized_cache[fit_smi]
