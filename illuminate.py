@@ -70,10 +70,14 @@ class illumination:
         return molecules
 
     def process_molecules(self, molecules: List[Chem.Mol]) -> Tuple[List[List[float]],List[float]]:
+        print("calculate descriptors using dask.bag ...", flush=True)
         descriptors = bag.map(self.descriptor, bag.from_sequence(molecules)).compute()
+        print("check if all descriptors pass requirements ...", flush=True)
         molecules, descriptors = zip(*[(molecule, descriptor) for molecule, descriptor in zip(molecules, descriptors)\
                 if all(1.0 > property > 0.0 for property in descriptor)])
+        print("convert mols and descriptors into two lists ...", flush=True)
         molecules, descriptors = list(molecules), list(descriptors)
+        print("calculate fitness of molecuels using dask.bag ...", flush=True)
         fitnesses = bag.map(self.fitness, bag.from_sequence(molecules)).compute()
         return molecules, descriptors, fitnesses
 
