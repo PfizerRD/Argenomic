@@ -31,6 +31,7 @@ class illumination:
         return None
 
     def __call__(self) -> None:
+        print("initial_population() ...", flush=True)
         self.initial_population()
         for generation in range(self.generations):
             print("="*30 + "\nGeneration {}".format(generation+1), flush=True)
@@ -43,11 +44,17 @@ class illumination:
         return None
 
     def initial_population(self) -> None:
+        print("read data_file to dataframe ...", flush=True)
         dataframe = pd.read_csv(hydra.utils.to_absolute_path(self.data_file))
+        print("add mol column to df ...", flush=True)
         pdtl.AddMoleculeColumnToFrame(dataframe, 'smiles', 'molecule')
+        print("sample molecules from df ...", flush=True)
         molecules = dataframe['molecule'].sample(n=self.initial_size).tolist()
+        print("filter unique_molecules using arbiter ...", flush=True)
         molecules = self.arbiter(self.unique_molecules(molecules))
+        print("process molecules ...", flush=True)
         molecules, descriptors, fitnesses = self.process_molecules(molecules)
+        print("add molecules to archive ...", flush=True)
         self.archive.add_to_archive(molecules, descriptors, fitnesses)
         return None
 
