@@ -8,7 +8,7 @@ from rdkit.Chem import PandasTools as pdtl
 
 from dask import bag
 from dask.distributed import Client
-from distributed.protocol import serialize
+from distributed.protocol import serialize, deserialize
 
 from argenomic.operations import crossover, mutator
 from argenomic.mechanism import descriptor, fitness
@@ -29,8 +29,9 @@ class illumination:
         #self.fitness = fitness(config.fitness, config.spec_params)
         self.fitness = fitness(config)
 
-        print("serialize(self.descriptor): \n{}".format(serialize(self.descriptor)), flush=True)
-        print("serialize(self.fitness): \n{}".format(serialize(self.fitness)), flush=True)
+        print("serialize(self.descriptor): \n{}\n".format(serialize(self.descriptor)), flush=True)
+        print("serialize(self.fitness): \n{}\n".format(serialize(self.fitness)), flush=True)
+        print("serialize(self.fitness): \n{}\n".format(deserialize(serialize(self.fitness))), flush=True)
 
         self.client = Client(n_workers=config.workers, threads_per_worker=config.threads)#,
                              #serializers=['pickle', 'dask'],
