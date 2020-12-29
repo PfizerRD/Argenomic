@@ -71,9 +71,6 @@ class fitness:
                 'enum_nitrogen': config.spec_params.enum_nitrogen,
             }
             print("param_dict:\n{}".format(self.param_dict), flush=True)
-            omegaOpts = oeomega.OEOmegaOptions()
-            omegaOpts.SetMaxConfs(self.param_dict['max_confs'])
-            self._omega = oeomega.OEOmega(omegaOpts)
             self._ref_overlay = self._calc_ref_overlay(config.fitness.target)
         return None
 
@@ -148,7 +145,10 @@ class fitness:
                                        self.param_dict['force_flip'],
                                        self.param_dict['enum_nitrogen']):
             enant = oechem.OEMol(enant)
-            ret_code = self._omega.Build(enant)
+            omegaOpts = oeomega.OEOmegaOptions()
+            omegaOpts.SetMaxConfs(self.param_dict['max_confs'])
+            _omega = oeomega.OEOmega(omegaOpts)
+            ret_code = _omega.Build(enant)
             if ret_code == oeomega.OEOmegaReturnCode_Success:
                 mol_list.append(oechem.OEMol(enant))
             else:
