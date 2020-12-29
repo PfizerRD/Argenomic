@@ -26,7 +26,8 @@ class illumination:
         self.arbiter = arbiter(config.arbiter)
         self.descriptor = descriptor(config.descriptor)
         self.archive = archive(config.archive, config.descriptor)
-        self.fitness = fitness(config.fitness, config.spec_params)
+        #self.fitness = fitness(config.fitness, config.spec_params)
+        self.fitness = fitness(config)
 
         print("serialize(self.descriptor): \n{}".format(serialize(self.descriptor)), flush=True)
         print("serialize(self.fitness): \n{}".format(serialize(self.fitness)), flush=True)
