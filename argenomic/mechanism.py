@@ -98,7 +98,8 @@ class fitness:
         return fitness_score
 
     def __reduce__(self):  # to help in pickling the fitness object in Dask
-        return (self.__class__, (self.param_dict, self.memoized_cache))
+        return (self.__class__,
+                (self.param_dict, self.memoized_cache, self._ref_overlay))
 
     def get_fingerprint(self, molecule: Chem.Mol, fingerprint_type: str):
         method_name = 'get_' + fingerprint_type
