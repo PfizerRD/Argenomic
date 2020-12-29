@@ -27,9 +27,9 @@ class illumination:
         self.archive = archive(config.archive, config.descriptor)
         self.fitness = fitness(config.fitness, config.spec_params)
 
-        self.client = Client(n_workers=config.workers, threads_per_worker=config.threads,
-                             serializers=['pickle', 'dask'],
-                             deserializers=['pickle', 'dask'])
+        self.client = Client(n_workers=config.workers, threads_per_worker=config.threads)#,
+                             #serializers=['pickle', 'dask'],
+                             #deserializers=['pickle', 'dask'])
                              #deserializers=['dask', 'msgpack'])
         return None
 
