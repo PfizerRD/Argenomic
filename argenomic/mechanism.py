@@ -71,7 +71,7 @@ class fitness:
                 'enum_nitrogen': config.spec_params.enum_nitrogen,
             }
             print("param_dict:\n{}".format(self.param_dict), flush=True)
-            self._ref_overlay = self._calc_ref_overlay(config.fitness.target)
+            self._ref3d = config.fitness.target
         return None
 
     def __call__(self, molecule: Chem.Mol) -> float:
@@ -98,8 +98,7 @@ class fitness:
         return fitness_score
 
     def __reduce__(self):  # to help in pickling the fitness object in Dask
-        return (self.__class__,
-                (self.param_dict, self.memoized_cache, self._ref_overlay))
+        return (self.__class__, (self.param_dict, self.memoized_cache, self._ref3d))
 
     def get_fingerprint(self, molecule: Chem.Mol, fingerprint_type: str):
         method_name = 'get_' + fingerprint_type
@@ -170,7 +169,7 @@ class fitness:
         # available options: "shape_only" or "shape_and_color"
         rocs_type = self.param_dict['rocs_type']
         try:
-            overlay = self._ref_overlay
+            overlay = self._calc_ref_overlay(self._ref3d)
             for fitmol in fit_confs:
                 prep = oeshape.OEOverlapPrep()
                 prep.Prep(fitmol)
