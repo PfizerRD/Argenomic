@@ -55,6 +55,7 @@ class fitness:
     A strategy class for calculating the fitness of a molecule.
     """
     def __init__(self, config_fitness, config_spec_params) -> None:
+        print("="*30 + "\n__init__ fitness ...\n", flush=True)
         self.memoized_cache = dict()
         if 'CFP' in config_fitness.type:
             self.fingerprint_type = config_fitness.type
