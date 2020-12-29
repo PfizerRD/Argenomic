@@ -69,7 +69,7 @@ class fitness:
                 'force_flip': config_spec_params.force_flip,
                 'enum_nitrogen': config_spec_params.enum_nitrogen,
             }
-            print("param_dict:\n{}".format(param_dict), flush=True)
+            print("param_dict:\n{}".format(self.param_dict), flush=True)
             omegaOpts = oeomega.OEOmegaOptions()
             omegaOpts.SetMaxConfs(self.param_dict['max_confs'])
             self._omega = oeomega.OEOmega(omegaOpts)
