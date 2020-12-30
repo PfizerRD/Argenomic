@@ -97,15 +97,19 @@ class fitness:
         print("{},{},{}".format(fit_smi, round(fitness_score, 2), round(time_taken, 1)), flush=True)
         return fitness_score
 
+    '''
     def __reduce__(self):  # to help in pickling the fitness object in Dask
         return (self.__class__, (self.param_dict, self.memoized_cache)) #, self._ref3d))
+    '''
 
     def __getstate__(self):
         state = self.__dict__.copy()
+        del state['param_dict']
         return state
 
     def __setstate__(self, state):
         self.__dict__.update(state)
+        self.param_dict = get_param_dict()
 
     def get_fingerprint(self, molecule: Chem.Mol, fingerprint_type: str):
         method_name = 'get_' + fingerprint_type
