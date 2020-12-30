@@ -50,6 +50,7 @@ class illumination:
         for generation in range(self.generations):
             print("="*30 + "\nGeneration {}".format(generation+1), flush=True)
             print("SMILES,ROCS_Score,Time", flush=True)
+            print(" started generate_molecules() ...", flush=True)
             molecules = self.generate_molecules()
             molecules, descriptors, fitnesses = self.process_molecules(molecules)
             self.archive.add_to_archive(molecules, descriptors, fitnesses)
@@ -75,12 +76,17 @@ class illumination:
 
     def generate_molecules(self) -> None:
         molecules = []
+        print("sample molecules from archive ...", flush=True)
         sample_molecules = self.archive.sample(self.batch_size)
+        print("sample molecule-pairs from archive ...", flush=True)
         sample_molecule_pairs = self.archive.sample_pairs(self.batch_size)
         for molecule in sample_molecules:
+            print("apply mutation to molecules from archive ...", flush=True)
             molecules.extend(self.mutator(molecule))
         for molecule_pair in sample_molecule_pairs:
+            print("apply crossover to molecule-pairs from archive ...", flush=True)
             molecules.extend(self.crossover(molecule_pair))
+        print("keep molecules from archive which pass all filters ...", flush=True)
         molecules = self.arbiter(self.unique_molecules(molecules))
         return molecules
 
