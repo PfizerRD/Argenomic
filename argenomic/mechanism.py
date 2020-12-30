@@ -98,7 +98,7 @@ class fitness:
         return fitness_score
 
     def __reduce__(self):  # to help in pickling the fitness object in Dask
-        return (self.__class__, (self.param_dict, self.memoized_cache, self._ref3d))
+        return (self.__class__, (self.param_dict, self.memoized_cache) #, self._ref3d))
 
     def __getstate__(self):
         state = self.__dict__.copy()

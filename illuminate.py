@@ -31,7 +31,7 @@ class illumination:
 
         print("serialize(self.descriptor): \n{}\n".format(serialize(self.descriptor)), flush=True)
         print("serialize(self.fitness): \n{}\n".format(serialize(self.fitness)), flush=True)
-        print("serialize(self.fitness): \n{}\n".format(deserialize(*serialize(self.fitness))), flush=True)
+        print("deserialize(self.fitness): \n{}\n".format(deserialize(*serialize(self.fitness))), flush=True)
 
         self.client = Client(n_workers=config.workers, threads_per_worker=config.threads)#,
                              #serializers=['pickle', 'dask'],
