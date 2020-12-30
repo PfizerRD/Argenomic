@@ -109,7 +109,7 @@ class fitness:
 
     def __setstate__(self, state):
         self.__dict__.update(state)
-        self.param_dict = get_param_dict()
+        #self.param_dict = get_param_dict()
 
     def get_fingerprint(self, molecule: Chem.Mol, fingerprint_type: str):
         method_name = 'get_' + fingerprint_type
