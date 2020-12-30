@@ -83,6 +83,7 @@ class fitness:
         fit_smi = Chem.MolToSmiles(molecule)
         try:
             if fit_smi in self.memoized_cache:
+                print("smi WAS memoized already ...", flush=True)
                 fitness_score = self.memoized_cache[fit_smi]
             else:
                 print("smi not memoized yet ...", flush=True)
