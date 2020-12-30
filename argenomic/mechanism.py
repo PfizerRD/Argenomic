@@ -105,7 +105,7 @@ class fitness:
 
     def __getstate__(self):
         state = self.__dict__.copy()
-        del state['param_dict']
+        #del state['param_dict']
         return state
 
     def __setstate__(self, state):

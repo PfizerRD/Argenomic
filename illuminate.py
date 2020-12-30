@@ -50,7 +50,7 @@ class illumination:
         for generation in range(self.generations):
             print("="*30 + "\nGeneration {}".format(generation+1), flush=True)
             print("SMILES,ROCS_Score,Time", flush=True)
-            print(" started generate_molecules() ...", flush=True)
+            print("started generate_molecules() ...", flush=True)
             molecules = self.generate_molecules()
             molecules, descriptors, fitnesses = self.process_molecules(molecules)
             self.archive.add_to_archive(molecules, descriptors, fitnesses)
