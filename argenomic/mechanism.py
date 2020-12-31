@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from typing import List, Tuple
 import time
-import timeout_decorator
+#import timeout_decorator
 
 from openeye import oechem, oeshape, oeomega
 
@@ -165,7 +165,7 @@ class fitness:
                 raise ValueError("Unable to build enantiomers!")       
         return mol_list
 
-    @timeout_decorator.timeout(5)
+    #@timeout_decorator.timeout(5)
     def _get_enantiomers_from_smi(self, smi):
         mol = oechem.OEMol()
         oechem.OESmilesToMol(mol, smi)
@@ -175,7 +175,7 @@ class fitness:
             raise ValueError("Unable to build enantiomers!")       
         return mol_list
 
-    @timeout_decorator.timeout(5)
+    #@timeout_decorator.timeout(5)
     def _calc_rocs_score(self, fit_confs):
         best_score = -np.inf
         # available options: "shape_only" or "shape_and_color"
