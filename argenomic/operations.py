@@ -22,7 +22,6 @@ class mutator:
         self.mutation_data = pd.read_csv(hydra.utils.to_absolute_path("data/smarts/mutation_collection.tsv"), sep='\t')
 
     def __call__(self, molecule:Chem.Mol) -> List[Chem.Mol]:
-        #print("sampled mutation ...", flush=True)
         sampled_mutation = self.mutation_data.sample(n=1, weights='probability').iloc[0]
         print("applied mutation ...", flush=True)
         reaction = AllChem.ReactionFromSmarts(sampled_mutation['smarts'])

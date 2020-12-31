@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from typing import List, Tuple
 import time
+import timeout_decorator
 
 from openeye import oechem, oeshape, oeomega
 
@@ -54,7 +55,6 @@ class fitness:
     """
     A strategy class for calculating the fitness of a molecule.
     """
-    #def __init__(self, config_fitness, config_spec_params) -> None:
     def __init__(self, config) -> None:
         print("="*30 + "\n__init__ fitness ...\n", flush=True)
         self.memoized_cache = dict()
@@ -105,12 +105,10 @@ class fitness:
 
     def __getstate__(self):
         state = self.__dict__.copy()
-        #del state['param_dict']
         return state
 
     def __setstate__(self, state):
         self.__dict__.update(state)
-        #self.param_dict = get_param_dict()
 
     def get_fingerprint(self, molecule: Chem.Mol, fingerprint_type: str):
         method_name = 'get_' + fingerprint_type
@@ -167,6 +165,7 @@ class fitness:
                 raise ValueError("Unable to build enantiomers!")       
         return mol_list
 
+    @timeout_decorator.timeout(5)
     def _get_enantiomers_from_smi(self, smi):
         mol = oechem.OEMol()
         oechem.OESmilesToMol(mol, smi)
@@ -176,6 +175,7 @@ class fitness:
             raise ValueError("Unable to build enantiomers!")       
         return mol_list
 
+    @timeout_decorator.timeout(5)
     def _calc_rocs_score(self, fit_confs):
         best_score = -np.inf
         # available options: "shape_only" or "shape_and_color"

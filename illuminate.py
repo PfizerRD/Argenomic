@@ -14,6 +14,7 @@ import pickle
 from argenomic.operations import crossover, mutator
 from argenomic.mechanism import descriptor, fitness
 from argenomic.infrastructure import archive, arbiter
+from base_logger import logger
 
 class illumination:
     def __init__(self, config) -> None:
@@ -27,24 +28,19 @@ class illumination:
         self.arbiter = arbiter(config.arbiter)
         self.descriptor = descriptor(config.descriptor)
         self.archive = archive(config.archive, config.descriptor)
-        #self.fitness = fitness(config.fitness, config.spec_params)
         self.fitness = fitness(config)
 
-        print("serialize(self.descriptor): \n{}\n".format(serialize(self.descriptor)), flush=True)
-        print("serialize(self.fitness): \n{}\n".format(serialize(self.fitness)), flush=True)
-        print("pickle.dumps(self.fitness): \n{}\n".format(pickle.dumps(self.fitness)), flush=True)
-        print("pickle.loads(pickle.dumps(self.fitness)): \n{}\n"
-              .format(pickle.loads(pickle.dumps(self.fitness))), flush=True)
-        #print("deserialize(self.fitness): \n{}\n".format(deserialize(*serialize(self.fitness))), flush=True)
+        logger.debug("serialize(self.descriptor): \n{}\n".format(serialize(self.descriptor)), flush=True)
+        logger.debug("serialize(self.fitness): \n{}\n".format(serialize(self.fitness)), flush=True)
+        logger.debug("pickle.dumps(self.fitness): \n{}\n".format(pickle.dumps(self.fitness)), flush=True)
+        logger.debug("pickle.loads(pickle.dumps(self.fitness)): \n{}\n"
+                     .format(pickle.loads(pickle.dumps(self.fitness))), flush=True)
 
-        self.client = Client(n_workers=config.workers, threads_per_worker=config.threads)#,
-                             #serializers=['pickle', 'dask'],
-                             #deserializers=['pickle', 'dask'])
-                             #deserializers=['dask', 'msgpack'])
+        self.client = Client(n_workers=config.workers, threads_per_worker=config.threads)
         return None
 
     def __call__(self) -> None:
-        print("initial_population() ...", flush=True)
+        logger.debug("initial_population() ...", flush=True)
         self.initial_population()
         print("FINISHED initial_population() ...", flush=True)
         for generation in range(self.generations):
