@@ -29,17 +29,17 @@ class illumination:
         self.archive = archive(config.archive, config.descriptor)
         self.fitness = fitness(config)
 
-        logger.debug("serialize(self.descriptor): \n{}\n".format(serialize(self.descriptor)), flush=True)
-        logger.debug("serialize(self.fitness): \n{}\n".format(serialize(self.fitness)), flush=True)
-        logger.debug("pickle.dumps(self.fitness): \n{}\n".format(pickle.dumps(self.fitness)), flush=True)
-        logger.debug("pickle.loads(pickle.dumps(self.fitness)): \n{}\n"
+        print("serialize(self.descriptor): \n{}\n".format(serialize(self.descriptor)), flush=True)
+        print("serialize(self.fitness): \n{}\n".format(serialize(self.fitness)), flush=True)
+        print("pickle.dumps(self.fitness): \n{}\n".format(pickle.dumps(self.fitness)), flush=True)
+        print("pickle.loads(pickle.dumps(self.fitness)): \n{}\n"
                      .format(pickle.loads(pickle.dumps(self.fitness))), flush=True)
 
         self.client = Client(n_workers=config.workers, threads_per_worker=config.threads)
         return None
 
     def __call__(self) -> None:
-        logger.debug("initial_population() ...", flush=True)
+        print("initial_population() ...", flush=True)
         self.initial_population()
         print("FINISHED initial_population() ...", flush=True)
         for generation in range(self.generations):
