@@ -1,4 +1,5 @@
 import sys
+import time
 import hydra
 import pandas as pd
 from typing import List, Tuple
@@ -35,14 +36,20 @@ class illumination:
         print("pickle.loads(pickle.dumps(self.fitness)): \n{}\n"
                      .format(pickle.loads(pickle.dumps(self.fitness))), flush=True)
 
+        self.timestr = time.strftime("%Y-%m-%d--%H-%M-%S")
+        print("="*40 + "\n Time: {} \n".format(self.timestr) + "="*40, flush=True)
+
         self.client = Client(n_workers=config.workers, threads_per_worker=config.threads)
         return None
 
     def __call__(self) -> None:
+        print("="*40 + "\n Start initial_population() at: {} \n".format(self.timestr) + "="*40, flush=True)
         print("initial_population() ...", flush=True)
         self.initial_population()
+        print("="*40 + "\n End initial_population() at: {} \n".format(self.timestr) + "="*40, flush=True)
         print("FINISHED initial_population() ...", flush=True)
         for generation in range(self.generations):
+            print("="*40 + "\n Start Generation at: {} \n".format(self.timestr) + "="*40, flush=True)
             print("="*30 + "\nGeneration {}".format(generation+1), flush=True)
             print("SMILES,ROCS_Score,Time", flush=True)
             print("started generate_molecules() ...", flush=True)
@@ -51,6 +58,7 @@ class illumination:
             self.archive.add_to_archive(molecules, descriptors, fitnesses)
             self.archive.store_statistics(generation)
             self.archive.store_archive(generation)
+            print("="*40 + "\n End Generation at: {} \n".format(self.timestr) + "="*40, flush=True)
         return None
 
     def initial_population(self) -> None:
