@@ -14,7 +14,6 @@ import pickle
 from argenomic.operations import crossover, mutator
 from argenomic.mechanism import descriptor, fitness
 from argenomic.infrastructure import archive, arbiter
-from base_logger import logger
 
 class illumination:
     def __init__(self, config) -> None:
