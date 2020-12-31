@@ -23,7 +23,7 @@ class mutator:
 
     def __call__(self, molecule:Chem.Mol) -> List[Chem.Mol]:
         sampled_mutation = self.mutation_data.sample(n=1, weights='probability').iloc[0]
-        print("applied mutation ...", flush=True)
+        #print("applied mutation ...", flush=True)
         reaction = AllChem.ReactionFromSmarts(sampled_mutation['smarts'])
         try:
             molecules = [products[0] for products in reaction.RunReactants([molecule])]
@@ -41,7 +41,7 @@ class crossover:
 
     def __call__(self, molecule_pair:Tuple[Chem.Mol, Chem.Mol]) -> List[Chem.Mol]:
         molecule_cores, molecule_sidechains = self.fragmentate(molecule_pair)
-        print("applied crossover to pair ...", flush=True)
+        #print("applied crossover to pair ...", flush=True)
         molecules = self.merge(molecule_cores, molecule_sidechains)
         return molecules
 

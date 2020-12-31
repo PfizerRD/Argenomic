@@ -30,11 +30,11 @@ class illumination:
         self.archive = archive(config.archive, config.descriptor)
         self.fitness = fitness(config)
 
-        print("serialize(self.descriptor): \n{}\n".format(serialize(self.descriptor)), flush=True)
-        print("serialize(self.fitness): \n{}\n".format(serialize(self.fitness)), flush=True)
-        print("pickle.dumps(self.fitness): \n{}\n".format(pickle.dumps(self.fitness)), flush=True)
-        print("pickle.loads(pickle.dumps(self.fitness)): \n{}\n"
-                     .format(pickle.loads(pickle.dumps(self.fitness))), flush=True)
+        #print("serialize(self.descriptor): \n{}\n".format(serialize(self.descriptor)), flush=True)
+        #print("serialize(self.fitness): \n{}\n".format(serialize(self.fitness)), flush=True)
+        #print("pickle.dumps(self.fitness): \n{}\n".format(pickle.dumps(self.fitness)), flush=True)
+        #print("pickle.loads(pickle.dumps(self.fitness)): \n{}\n"
+        #             .format(pickle.loads(pickle.dumps(self.fitness))), flush=True)
 
         timestr = time.strftime("%Y-%m-%d--%H-%M-%S", time.localtime())
         print("="*40 + "\n Time: {} \n".format(timestr) + "="*40, flush=True)
@@ -45,17 +45,17 @@ class illumination:
     def __call__(self) -> None:
         timestr = time.strftime("%Y-%m-%d--%H-%M-%S", time.localtime())
         print("="*40 + "\n Start initial_population() at: {} \n".format(timestr) + "="*40, flush=True)
-        print("initial_population() ...", flush=True)
+        #print("initial_population() ...", flush=True)
         self.initial_population()
         timestr = time.strftime("%Y-%m-%d--%H-%M-%S", time.localtime())
         print("="*40 + "\n End initial_population() at: {} \n".format(timestr) + "="*40, flush=True)
-        print("FINISHED initial_population() ...", flush=True)
+        #print("FINISHED initial_population() ...", flush=True)
         for generation in range(self.generations):
             timestr = time.strftime("%Y-%m-%d--%H-%M-%S", time.localtime())
-            print("="*40 + "\n Start Generation at: {} \n".format(timestr) + "="*40, flush=True)
-            print("="*30 + "\nGeneration {}".format(generation+1), flush=True)
-            print("SMILES,ROCS_Score,Time", flush=True)
-            print("started generate_molecules() ...", flush=True)
+            print("="*40 + "\n Start Generation {} at: {} \n".format(generation+1, timestr) + "="*40, flush=True)
+            #print("="*30 + "\nGeneration {}".format(generation+1), flush=True)
+            #print("SMILES,ROCS_Score,Time", flush=True)
+            #print("started generate_molecules() ...", flush=True)
             molecules = self.generate_molecules()
             molecules, descriptors, fitnesses = self.process_molecules(molecules)
             self.archive.add_to_archive(molecules, descriptors, fitnesses)
@@ -66,49 +66,49 @@ class illumination:
         return None
 
     def initial_population(self) -> None:
-        print("read data_file to dataframe ...", flush=True)
+        #print("read data_file to dataframe ...", flush=True)
         dataframe = pd.read_csv(hydra.utils.to_absolute_path(self.data_file))
-        print("add mol column to df ...", flush=True)
+        #print("add mol column to df ...", flush=True)
         pdtl.AddMoleculeColumnToFrame(dataframe, 'smiles', 'molecule')
-        print("sample molecules from df ...", flush=True)
+        #print("sample molecules from df ...", flush=True)
         molecules = dataframe['molecule'].sample(n=self.initial_size).tolist()
-        print("filter unique_molecules using arbiter ...", flush=True)
+        #print("filter unique_molecules using arbiter ...", flush=True)
         molecules = self.arbiter(self.unique_molecules(molecules))
-        print("process molecules ...", flush=True)
+        #print("process molecules ...", flush=True)
         molecules, descriptors, fitnesses = self.process_molecules(molecules)
-        print("FINISHED processing molecules ...", flush=True)
-        print("add molecules to archive ...", flush=True)
+        #print("FINISHED processing molecules ...", flush=True)
+        #print("add molecules to archive ...", flush=True)
         self.archive.add_to_archive(molecules, descriptors, fitnesses)
         return None
 
     def generate_molecules(self) -> None:
         molecules = []
-        print("sample molecules from archive ...", flush=True)
+        #print("sample molecules from archive ...", flush=True)
         sample_molecules = self.archive.sample(self.batch_size)
-        print("sample molecule-pairs from archive ...", flush=True)
+        #print("sample molecule-pairs from archive ...", flush=True)
         sample_molecule_pairs = self.archive.sample_pairs(self.batch_size)
         for molecule in sample_molecules:
-            print("apply mutation to molecules from archive ...", flush=True)
+            #print("apply mutation to molecules from archive ...", flush=True)
             molecules.extend(self.mutator(molecule))
         for molecule_pair in sample_molecule_pairs:
-            print("apply crossover to molecule-pairs from archive ...", flush=True)
+            #print("apply crossover to molecule-pairs from archive ...", flush=True)
             molecules.extend(self.crossover(molecule_pair))
-        print("keep molecules from archive which pass all filters ...", flush=True)
+        #print("keep molecules from archive which pass all filters ...", flush=True)
         molecules = self.arbiter(self.unique_molecules(molecules))
         return molecules
 
     def process_molecules(self, molecules: List[Chem.Mol]) -> Tuple[List[List[float]],List[float]]:
-        print("="*30 + "\nprocess_molecules\n", flush=True)
-        print("calculate descriptors using dask.bag ...", flush=True)
+        #print("="*30 + "\nprocess_molecules\n", flush=True)
+        #print("calculate descriptors using dask.bag ...", flush=True)
         descriptors = bag.map(self.descriptor, bag.from_sequence(molecules)).compute()
-        print("check if all descriptors pass requirements ...", flush=True)
+        #print("check if all descriptors pass requirements ...", flush=True)
         molecules, descriptors = zip(*[(molecule, descriptor) for molecule, descriptor in zip(molecules, descriptors)\
                 if all(1.0 > property > 0.0 for property in descriptor)])
-        print("convert mols and descriptors into two lists ...", flush=True)
+        #print("convert mols and descriptors into two lists ...", flush=True)
         molecules, descriptors = list(molecules), list(descriptors)
-        print("calculate fitness of molecuels using dask.bag ...", flush=True)
+        #print("calculate fitness of molecuels using dask.bag ...", flush=True)
         fitnesses = bag.map(self.fitness, bag.from_sequence(molecules)).compute()
-        print("FINISHED calculating fitness of molecuels using dask.bag ...", flush=True)
+        #print("FINISHED calculating fitness of molecuels using dask.bag ...", flush=True)
         return molecules, descriptors, fitnesses
 
     @staticmethod

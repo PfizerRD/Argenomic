@@ -70,26 +70,26 @@ class fitness:
                 'force_flip': config.spec_params.force_flip,
                 'enum_nitrogen': config.spec_params.enum_nitrogen,
             }
-            print("param_dict:\n{}".format(self.param_dict), flush=True)
+            #print("param_dict:\n{}".format(self.param_dict), flush=True)
             self._ref3d = config.fitness.target
         return None
 
     def __call__(self, molecule: Chem.Mol) -> float:
-        print("="*30 + "\n__call__ fitness ...\n", flush=True)
+        #print("="*30 + "\n__call__ fitness ...\n", flush=True)
         start_time = time.time()
         time_taken = 0
         #fit_smi = MolToSmiles(molecule)
-        print("get smiles from molecule ...", flush=True)
+        #print("get smiles from molecule ...", flush=True)
         fit_smi = Chem.MolToSmiles(molecule)
         try:
             if fit_smi in self.memoized_cache:
-                print("smi WAS memoized already ...", flush=True)
+                #print("smi WAS memoized already ...", flush=True)
                 fitness_score = self.memoized_cache[fit_smi]
             else:
-                print("smi not memoized yet ...", flush=True)
-                print("generate confs from smi ...", flush=True)
+                #print("smi not memoized yet ...", flush=True)
+                #print("generate confs from smi ...", flush=True)
                 fit_confs = self._get_enantiomers_from_smi(fit_smi)
-                print("calculate fitness_score ...", flush=True)
+                #print("calculate fitness_score ...", flush=True)
                 fitness_score = self._calc_rocs_score(fit_confs)
                 self.memoized_cache[fit_smi] = fitness_score
                 time_taken = time.time() - start_time
