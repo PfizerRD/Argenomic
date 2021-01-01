@@ -89,7 +89,7 @@ class archive:
         else:
             with open('statistics.csv', 'w') as file:
                 file.close()
-        print('Generation: {}, Size: {:.2f}'.format(statistics[0], statistics[4]))
+        print('Generation: {}, Size: {:.2f}'.format(statistics[0]+1, statistics[4]))
         print('Fitness Max: {:.7f}, Mean: {:.7f}, Std: {:.7f}'.format(statistics[1], statistics[2], statistics[3]))
         return None
 

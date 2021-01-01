@@ -18,7 +18,7 @@ class mutator:
     according to the principles of positional analogue scanning.
     """
     def __init__(self) -> None:
-        print("\n" + "="*30 + "\n__init__ mutator ...\n", flush=True)
+        #print("\n" + "="*30 + "\n__init__ mutator ...\n", flush=True)
         self.mutation_data = pd.read_csv(hydra.utils.to_absolute_path("data/smarts/mutation_collection.tsv"), sep='\t')
 
     def __call__(self, molecule:Chem.Mol) -> List[Chem.Mol]:
@@ -36,7 +36,7 @@ class crossover:
     A strategy class implementing a parent-centric crossover of small molecules.
     """
     def __init__(self):
-        print("\n" + "="*30 + "\n__init__ crossover ...\n", flush=True)
+        #print("\n" + "="*30 + "\n__init__ crossover ...\n", flush=True)
         pass
 
     def __call__(self, molecule_pair:Tuple[Chem.Mol, Chem.Mol]) -> List[Chem.Mol]:

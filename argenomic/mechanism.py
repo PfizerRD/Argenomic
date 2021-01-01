@@ -3,9 +3,8 @@ import numpy as np
 import pandas as pd
 from typing import List, Tuple
 import time
-#import timeout_decorator
 
-from openeye import oechem, oeshape, oeomega
+from openeye import oechem, oeshape, oeomega, oemedchem
 
 from rdkit import Chem
 from rdkit import rdBase
@@ -56,7 +55,6 @@ class fitness:
     A strategy class for calculating the fitness of a molecule.
     """
     def __init__(self, config) -> None:
-        print("="*30 + "\n__init__ fitness ...\n", flush=True)
         self.memoized_cache = dict()
         if 'CFP' in config.fitness.type:
             self.fingerprint_type = config.fitness.type
@@ -70,26 +68,20 @@ class fitness:
                 'force_flip': config.spec_params.force_flip,
                 'enum_nitrogen': config.spec_params.enum_nitrogen,
             }
-            #print("param_dict:\n{}".format(self.param_dict), flush=True)
             self._ref3d = config.fitness.target
+            self._ref_topo_scaffold = self._get_Topo_BemisMurcko_framework_from_3d_ref()
+            self._penalty_weight = config.penalty_weight
         return None
 
     def __call__(self, molecule: Chem.Mol) -> float:
-        #print("="*30 + "\n__call__ fitness ...\n", flush=True)
         start_time = time.time()
         time_taken = 0
-        #fit_smi = MolToSmiles(molecule)
-        #print("get smiles from molecule ...", flush=True)
         fit_smi = Chem.MolToSmiles(molecule)
         try:
             if fit_smi in self.memoized_cache:
-                #print("smi WAS memoized already ...", flush=True)
                 fitness_score = self.memoized_cache[fit_smi]
             else:
-                #print("smi not memoized yet ...", flush=True)
-                #print("generate confs from smi ...", flush=True)
                 fit_confs = self._get_enantiomers_from_smi(fit_smi)
-                #print("calculate fitness_score ...", flush=True)
                 fitness_score = self._calc_rocs_score(fit_confs)
                 self.memoized_cache[fit_smi] = fitness_score
                 time_taken = time.time() - start_time
@@ -97,11 +89,6 @@ class fitness:
             fitness_score = 0
         print("{},{},{}".format(fit_smi, round(fitness_score, 2), round(time_taken, 1)), flush=True)
         return fitness_score
-
-    '''
-    def __reduce__(self):  # to help in pickling the fitness object in Dask
-        return (self.__class__, (self.param_dict, self.memoized_cache)) #, self._ref3d))
-    '''
 
     def __getstate__(self):
         state = self.__dict__.copy()
@@ -129,13 +116,13 @@ class fitness:
     def get_FCFP6(self, molecule: Chem.Mol):
         return AllChem.GetMorganFingerprint(molecule, 3, useFeatures=True)
 
-    def _calc_ref_overlay(self, ref3d):
-        ref_mol = self._get_ref_from_3D_file(ref3d)
+    def _calc_ref_overlay(self):
+        ref_mol = self._get_ref_from_3D_file()
         ref_overlay = self._create_shape_overlay(ref_mol)
         return ref_overlay
 
-    def _get_ref_from_3D_file(self, ref3d):
-        reffs = oechem.oemolistream(ref3d)
+    def _get_ref_from_3D_file(self):
+        reffs = oechem.oemolistream(self._ref3d)
         reffs.SetConfTest(oechem.OEIsomericConfTest())  # read all conformers from input SDF file
         refmol = oechem.OEMol()
         oechem.OEReadMolecule(reffs, refmol)
@@ -165,7 +152,6 @@ class fitness:
                 raise ValueError("Unable to build enantiomers!")       
         return mol_list
 
-    #@timeout_decorator.timeout(5)
     def _get_enantiomers_from_smi(self, smi):
         mol = oechem.OEMol()
         oechem.OESmilesToMol(mol, smi)
@@ -175,22 +161,81 @@ class fitness:
             raise ValueError("Unable to build enantiomers!")       
         return mol_list
 
-    #@timeout_decorator.timeout(5)
+    def _get_Topo_BemisMurcko_framework_from_3d_ref(self):
+        ref_mol = self._get_ref_from_3D_file()
+        ref_BM_framework = None
+        adjustHCount = True
+        for frag in oemedchem.OEGetBemisMurcko(ref_mol):
+            fragment = oechem.OEGraphMol()
+            oechem.OESubsetMol(fragment, ref_mol, frag, adjustHCount)
+            if ".".join(r.GetName() for r in frag.GetRoles()) == 'Framework':
+                oechem.OEUncolorMol(fragment)  # make scaffold generic
+                ref_BM_framework = oechem.OEMolToSmiles(fragment)
+        return ref_BM_framework
+
+    @classmethod
+    def _get_Topo_BemisMurcko_framework_from_fit_smi(cls, fit_smi):
+        fit_mol = oechem.OEGraphMol()
+        oechem.OESmilesToMol(fit_mol, fit_smi)
+        fit_BM_framework = None
+        adjustHCount = True
+        for frag in oemedchem.OEGetBemisMurcko(fit_mol):
+            fragment = oechem.OEGraphMol()
+            oechem.OESubsetMol(fragment, fit_mol, frag, adjustHCount)
+            if ".".join(r.GetName() for r in frag.GetRoles()) == 'Framework':
+                oechem.OEUncolorMol(fragment)  # make scaffold generic
+                fit_BM_framework = oechem.OEMolToSmiles(fragment)
+        return fit_BM_framework
+
+    def _get_num_atoms_in_ref_scaffold(self):
+        #ref_scaffold = self._get_Topo_BemisMurcko_framework_from_3d_ref()
+        ref_scaffold = self._ref_topo_scaffold
+        mol = oechem.OEGraphMol()
+        oechem.OEParseSmiles(mol, ref_scaffold)
+        return mol.NumAtoms()
+
+    def _get_num_atoms_max_common_substructure(self, fit_smi):
+        ref_scaffold = self._ref_topo_scaffold
+        fit_scaffold = self._get_Topo_BemisMurcko_framework_from_fit_smi(fit_smi)
+        pattern = oechem.OEGraphMol()
+        target = oechem.OEGraphMol()
+        oechem.OESmilesToMol(pattern, ref_scaffold)
+        oechem.OESmilesToMol(target, fit_scaffold)
+
+        atomexpr = oechem.OEExprOpts_DefaultAtoms
+        bondexpr = oechem.OEExprOpts_DefaultBonds
+
+        mcss = oechem.OEMCSSearch(pattern, atomexpr, bondexpr, oechem.OEMCSType_Approximate)
+        mcss.SetMCSFunc(oechem.OEMCSMaxAtoms())
+
+        unique = True
+        top_match_num_atoms = 0
+        for match in mcss.Match(target, unique):
+            if match.NumAtoms() > top_match_num_atoms:
+                top_match_num_atoms = match.NumAtoms()
+        return top_match_num_atoms
+
     def _calc_rocs_score(self, fit_confs):
         best_score = -np.inf
         # available options: "shape_only" or "shape_and_color"
         rocs_type = self.param_dict['rocs_type']
+        penalty = 0
         try:
-            overlay = self._calc_ref_overlay(self._ref3d)
-            for fitmol in fit_confs:
+            overlay = self._calc_ref_overlay()
+            for i, fitmol in enumerate(fit_confs):
                 prep = oeshape.OEOverlapPrep()
                 prep.Prep(fitmol)
                 score = oeshape.OEBestOverlayScore()
                 overlay.BestOverlay(score, fitmol, oeshape.OEHighestTanimoto())
+                if self._penalty_weight != 0 and i == 0:
+                    fit_smi = oechem.OEMolToSmiles(fitmol)
+                    num_atoms_in_mcss = self._get_num_atoms_max_common_substructure(fit_smi)
+                    num_atoms_in_ref_scaffold = self._get_num_atoms_in_ref_scaffold()
+                    penalty = num_atoms_in_mcss / num_atoms_in_ref_scaffold
                 if rocs_type == "shape_only" and score.GetTanimoto() > best_score:
-                    best_score = score.GetTanimoto()
+                    best_score = score.GetTanimoto() - 0.5 * self._penalty_weight * penalty
                 elif rocs_type == "shape_and_color" and score.GetTanimotoCombo() > best_score:
-                    best_score = score.GetTanimotoCombo()
+                    best_score = score.GetTanimotoCombo() - self._penalty_weight * penalty
                 elif rocs_type not in ("shape_only", "shape_and_color"):
                     raise ValueError("Invalid ROCS score type!")
         except:
