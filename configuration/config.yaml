@@ -1,6 +1,6 @@
 ---
 path_to_remove: /cm/local/apps/cuda/libs/current/pynvml
-data_file: /gpfs/home/rezaem/repos/Argenomic/data/smiles/guacamol_initial_rediscovery_ref_3.smi
+data_file: /gpfs/workspace/users/rezaem/repos/Argenomic-data/data/my_runs_input/guacamol_initial_rediscovery_ref_3.smi
 batch_size: 40
 initial_size: 100
 workers: 1
@@ -25,7 +25,7 @@ spec_params:
   force_flip: true
   enum_nitrogen: true
 fitness:
-  target: /gpfs/home/rezaem/repos/Argenomic/data/sdf/fastrocs_Ref_3.sdf
+  target: /gpfs/workspace/users/rezaem/repos/Argenomic-data/data/my_runs_input/fastrocs_Ref_3.sdf
   type: ROCS_3D
 arbiter:
   rules:
