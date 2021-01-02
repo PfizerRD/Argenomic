@@ -30,12 +30,6 @@ class illumination:
         self.archive = archive(config.archive, config.descriptor)
         self.fitness = fitness(config)
 
-        print("serialize(self.descriptor): \n{}\n".format(serialize(self.descriptor)), flush=True)
-        print("serialize(self.fitness): \n{}\n".format(serialize(self.fitness)), flush=True)
-        print("pickle.dumps(self.fitness): \n{}\n".format(pickle.dumps(self.fitness)), flush=True)
-        print("pickle.loads(pickle.dumps(self.fitness)): \n{}\n"
-                     .format(pickle.loads(pickle.dumps(self.fitness))), flush=True)
-
         self.client = Client(n_workers=config.workers, threads_per_worker=config.threads)
         return None
 

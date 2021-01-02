@@ -35,10 +35,13 @@ class elite():
 
 class archive:
     def __init__(self, archive_config, descriptor_config) -> None:
+        self.archive_jobname = archive_config.jobname
         self.archive_size = archive_config.size
         self.archive_accuracy = archive_config.accuracy
         self.archive_dimensions = len(descriptor_config.properties)
-        self.cache_string = "cache_{}_{}.csv".format(self.archive_dimensions, self.archive_accuracy)
+        self.cache_string = "cache_{}_{}_{}.csv".format(self.archive_jobname,
+                                                        self.archive_dimensions,
+                                                        self.archive_accuracy)
         self.cvt_location = hydra.utils.to_absolute_path("data/cvt/" + self.cache_string)
         if os.path.isfile(self.cvt_location):
             self.cvt_centers = np.loadtxt(self.cvt_location)
