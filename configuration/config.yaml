@@ -27,6 +27,7 @@ spec_params:
 fitness:
   target: /gpfs/workspace/users/rezaem/repos/Argenomic-data/data/my_runs_input/fastrocs_Ref_3.sdf
   type: ROCS_3D
+  core: O=C(NCC1=CC=CC=C1)C1CCCN1
 arbiter:
   rules:
   - Glaxo
