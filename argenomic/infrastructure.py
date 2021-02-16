@@ -13,6 +13,7 @@ from sklearn.cluster import KMeans
 from sklearn.neighbors import KDTree
 
 from rdkit import Chem
+from rdkit.Chem.rdMolDescriptors import CalcNumAtomStereoCenters
 from rdkit import rdBase
 from rdkit.Chem import AllChem
 rdBase.DisableLog('rdApp.error')
@@ -132,6 +133,7 @@ class arbiter:
         Checks if a given molecule passes through the chosen filters (hologenicity,
         veber_infractions, ChEMBL structural alerts, ...).
         """
+        stereochemistry = self.stereochemistry(molecule)
         toxicity = self.toxicity(molecule)
         hologenicity = self.hologenicity(molecule)
         veber_infraction = self.veber_infraction(molecule)
@@ -140,6 +142,12 @@ class arbiter:
             ring_infraction = self.ring_infraction(molecule)
             validity = validity and not (ring_infraction)
         return validity
+
+    def stereochemistry(self, molecule: Chem.Mol) -> bool:
+        """
+        Checks if a given molecule fails the stereochemistry filters.
+        """
+        return CalcNumAtomStereoCenters(molecule) > 3
 
     def toxicity(self, molecule: Chem.Mol) -> bool:
         """
