@@ -6,7 +6,6 @@ initial_size: 100
 workers: 1
 threads: 2
 generations: 75
-penalty_weight: 0
 archive:
   name: ref_3
   jobname: ref3_no_penalty
