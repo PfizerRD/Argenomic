@@ -137,7 +137,7 @@ class arbiter:
         toxicity = self.toxicity(molecule)
         hologenicity = self.hologenicity(molecule)
         veber_infraction = self.veber_infraction(molecule)
-        validity = not (toxicity or hologenicity or veber_infraction)
+        validity = not (stereochemistry or toxicity or hologenicity or veber_infraction)
         if molecule.HasSubstructMatch(Chem.MolFromSmarts('[R]')):
             ring_infraction = self.ring_infraction(molecule)
             validity = validity and not (ring_infraction)
