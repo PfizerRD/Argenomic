@@ -57,6 +57,7 @@ class fitness:
     A strategy class for calculating the fitness of a molecule.
     """
     def __init__(self, config) -> None:
+        print("="*30 + "\n__init__ fitness ...\n", flush=True)
         self.memoized_cache = dict()
         if 'CFP' in config.fitness.type:
             self.fingerprint_type = config.fitness.type
@@ -70,6 +71,7 @@ class fitness:
                 'force_flip': config.spec_params.force_flip,
                 'enum_nitrogen': config.spec_params.enum_nitrogen,
             }
+            print("param_dict:\n{}".format(self.param_dict), flush=True)
             self._ref3d = config.fitness.target
             self._ref_smi = self._get_ref_smi()
             self._ref_overlay = self._calc_ref_overlay()
@@ -79,17 +81,24 @@ class fitness:
         return None
 
     def __call__(self, molecule: Chem.Mol) -> float:
+        print("="*30 + "\n__call__ fitness ...\n", flush=True)
         start_time = time.time()
         time_taken = 0
+        print("="*30 + "\n__call__ fitness ...\n", flush=True)
         fit_smi = Chem.MolToSmiles(molecule)
         try:
             if fit_smi in self.memoized_cache:
+                print("smi WAS memoized already ...", flush=True)
                 fitness_score = self.memoized_cache[fit_smi]
             elif self._fit_contains_ref_core_topo_scaffold(fit_smi):
+                print("fit contains ref core topo scaffold ...", flush=True)
                 fitness_score = 0
                 self.memoized_cache[fit_smi] = fitness_score
             else:
+                print("smi not memoized yet ...", flush=True)
+                print("generate confs from smi ...", flush=True)
                 fit_confs = self._get_enantiomers_from_smi(fit_smi)
+                print("calculate fitness_score ...", flush=True)
                 fitness_score = self._calc_rocs_score(fit_confs)
                 self.memoized_cache[fit_smi] = fitness_score
                 time_taken = time.time() - start_time
