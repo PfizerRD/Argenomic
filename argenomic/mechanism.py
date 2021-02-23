@@ -74,7 +74,7 @@ class fitness:
             print("param_dict:\n{}".format(self.param_dict), flush=True)
             self._ref3d = config.fitness.target
             self._ref_smi = self._get_ref_smi()
-            self._ref_overlay = self._calc_ref_overlay()
+            #self._ref_overlay = self._calc_ref_overlay()
             self._ref_core = config.fitness.core
             self._ref_core_topo_scaffold_mol = self._get_ref_core_topo_scaffold_mol()
             self._ref_core_topo_scaffold_pattern_fp = self._get_pattern_fp_from_ref_core_topo_scaffold()
@@ -222,7 +222,7 @@ class fitness:
         # available options: "shape_only" or "shape_and_color"
         rocs_type = self.param_dict['rocs_type']
         try:
-            overlay = self._ref_overlay
+            overlay = self._calc_ref_overlay()
             for fitmol in fit_confs:
                 prep = oeshape.OEOverlapPrep()
                 prep.Prep(fitmol)
