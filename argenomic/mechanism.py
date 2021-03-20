@@ -72,9 +72,9 @@ class fitness:
             }
             self._ref3d = config.fitness.target
             self._ref_smi = self._get_ref_smi()
-            self._ref_core = config.fitness.core
-            self._ref_core_topo_scaffold_mol = self._get_ref_core_topo_scaffold_mol()
-            self._ref_core_topo_scaffold_pattern_fp = self._get_pattern_fp_from_ref_core_topo_scaffold()
+            self._segment_thresholds = config.fitness.thresholds.split()
+            self._segment_penalty_weights = config.fitness.penalty_weights.split()
+            self._segment_smis = config.fitness.segment_smis.split()
         return None
 
     def __call__(self, molecule: Chem.Mol) -> float:
@@ -84,9 +84,6 @@ class fitness:
         try:
             if fit_smi in self.memoized_cache:
                 fitness_score = self.memoized_cache[fit_smi]
-            elif self._fit_contains_ref_core_topo_scaffold(fit_smi):
-                fitness_score = 0
-                self.memoized_cache[fit_smi] = fitness_score
             else:
                 fit_confs = self._get_enantiomers_from_smi(fit_smi)
                 fitness_score = self._calc_rocs_score(fit_confs)
@@ -148,6 +145,58 @@ class fitness:
         overlay.SetupRef(ref_mol)
         return overlay
 
+    def _get_ref_mol_segments(self):
+        _segment_smis = self._segment_smis
+        _segment_mols = []
+        unique = True
+        ss = oechem.OESubSearch()
+
+        # perform a substructure search to find the portion of the refmol
+        for seg_smi in _segment_smis:
+            if not ss.Init(seg_smi):
+                oechem.OEThrow.Fatal("Unable to parse SMILES: {}".format(seg_smi))
+
+        refmol = self._get_ref_mol_from_3D_file()
+        oechem.OEPrepareSearch(refmol, ss)
+
+        for seg_smi in _segment_smis:
+            ss.Init(seg_smi)
+            if not ss.SingleMatch(refmol):
+                oechem.OEThrow.Fatal("SMILES fails to match refmol")
+
+            for match in ss.Match(refmol, unique):
+                # create match atom/bond set for target atoms
+                abset = oechem.OEAtomBondSet()
+                for ma in match.GetTargetAtoms():
+                    abset.AddAtom(ma)
+
+                for mb in match.GetTargetBonds():
+                    abset.AddBond(mb)
+
+                # create match subgraph
+                subRef = oechem.OEMol()
+                oechem.OESubsetMol(subRef, abset, True)
+
+            _segment_mols.append(subRef)
+
+        return _segment_mols
+
+    def _calc_segment_overlays(self):
+        segment_mols = self._get_ref_mol_segments()
+        segment_overlays = self._create_shape_overlays_segments(segment_mols)
+        return segment_overlays
+
+    @classmethod
+    def _create_shape_overlays_segments(cls, segment_mols):
+        segment_overlays = []
+        for seg_mol in segment_mols:
+            prep = oeshape.OEOverlapPrep()
+            prep.Prep(seg_mol)
+            overlay = oeshape.OEMultiRefOverlay()
+            overlay.SetupRef(seg_mol)
+            segment_overlays.append(overlay)
+        return segment_overlays
+
     def _get_enantiomers_from_mol(self, mol):
         mol_list = []
         for enant in oeomega.OEFlipper(mol, self.param_dict['max_centers'],
@@ -173,57 +222,49 @@ class fitness:
             raise ValueError("Unable to build enantiomers!")       
         return mol_list
 
-    def _get_ref_core_topo_scaffold_mol(self):
-        mol = Chem.MolFromSmiles(self._ref_core)
-        ref_core_topo_scaffold_mol = MakeScaffoldGeneric(GetScaffoldForMol(mol))
-        return ref_core_topo_scaffold_mol
-
-    @classmethod
-    def _get_fit_topo_scaffold_mol(cls, fit_smi):
-        mol = Chem.MolFromSmiles(fit_smi)
-        fit_topo_scaffold_mol = MakeScaffoldGeneric(GetScaffoldForMol(mol))
-        return fit_topo_scaffold_mol
-
-    def _get_pattern_fp_from_ref_core_topo_scaffold(self):
-        scaffold_mol = self._get_ref_core_topo_scaffold_mol()
-        ref_core_pattern_fp = Chem.PatternFingerprint(scaffold_mol, 2048)
-        return ref_core_pattern_fp
-
-    def _get_pattern_fp_from_fit_topo_scaffold(self, fit_smi):
-        scaffold_mol = self._get_fit_topo_scaffold_mol(fit_smi)
-        fit_pattern_fp = Chem.PatternFingerprint(scaffold_mol, 2048)
-        return fit_pattern_fp
-
-    @classmethod
-    def _get_pattern_fp_from_fit_topo_scaffold_mol(cls, mol):
-        fit_pattern_fp = Chem.PatternFingerprint(mol, 2048)
-        return fit_pattern_fp
-
-    def _fit_contains_ref_core_topo_scaffold(self, fit_smi):
-        ref_core_pattern_fp = self._ref_core_topo_scaffold_pattern_fp
-        fit_topo_scaffold_mol = self._get_fit_topo_scaffold_mol(fit_smi)
-        fit_pattern_fp = self._get_pattern_fp_from_fit_topo_scaffold_mol(fit_topo_scaffold_mol)
-
-        return (DataStructs.AllProbeBitsMatch(ref_core_pattern_fp, fit_pattern_fp) and
-                fit_topo_scaffold_mol.HasSubstructMatch(self._ref_core_topo_scaffold_mol))
-
     def _calc_rocs_score(self, fit_confs):
         best_score = -np.inf
         # available options: "shape_only" or "shape_and_color"
         rocs_type = self.param_dict['rocs_type']
         try:
             overlay = self._calc_ref_overlay()
-            for fitmol in fit_confs:
+            best_index = -1
+            for i, fitmol in enumerate(fit_confs):
                 prep = oeshape.OEOverlapPrep()
                 prep.Prep(fitmol)
                 score = oeshape.OEBestOverlayScore()
-                overlay.BestOverlay(score, fitmol, oeshape.OEHighestTanimoto())
-                if rocs_type == "shape_only" and score.GetTanimoto() > best_score:
-                    best_score = score.GetTanimoto()
-                elif rocs_type == "shape_and_color" and score.GetTanimotoCombo() > best_score:
-                    best_score = score.GetTanimotoCombo()
+                overlay.BestOverlay(score, fitmol, oeshape.OEHighestRefTverskyCombo())
+                if rocs_type == "shape_only" and score.GetRefTversky() > best_score:
+                    best_score = score.GetRefTversky()
+                    best_index = i
+                elif rocs_type == "shape_and_color" and score.GetRefTverskyCombo() > best_score:
+                    best_score = score.GetRefTverskyCombo()
+                    best_index = i
                 elif rocs_type not in ("shape_only", "shape_and_color"):
                     raise ValueError("Invalid ROCS score type!")
+            fitness_score = best_score
+
+            if len(self._segment_smis) > 0:
+                prep = oeshape.OEOverlapPrep()
+
+                for i, fitmol in enumerate(fit_confs):
+                    if i == best_index:
+                        prep.Prep(fitmol)
+                        
+                        for j, seg_overlay in enumerate(self._calc_segment_overlays()):
+                            seg_score = oeshape.OEBestOverlayScore()
+                            seg_overlay.BestOverlay(seg_score, fitmol, oeshape.OEHighestRefTversky())
+                            seg_ref_Tversky_score = seg_score.GetRefTversky()
+
+                            upperbound = 2
+
+                            if seg_ref_Tversky_score > self._segment_thresholds[j]:
+                                if seg_ref_Tversky_score > upperbound:
+                                    seg_ref_Tversky_score = upperbound
+                                penalty = (upperbound - seg_ref_Tversky_score) / (upperbound - self._segment_thresholds[j])
+                                weighted_penalty = self._segment_penalty_weights[j] * penalty
+                                reward *= weighted_penalty
+                        break
         except:
             raise ValueError("Unable to calculate ROCS score!")
         return max(0, best_score)

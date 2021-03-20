@@ -26,7 +26,9 @@ spec_params:
 fitness:
   target: /gpfs/workspace/users/rezaem/repos/Argenomic-data/data/my_runs_input/fastrocs_Ref_3.sdf
   type: ROCS_3D
-  core: O=C(NCC1=CC=CC=C1)C1CCCN1
+  thresholds: "0.9 0.7 0.9"
+  penalty_weights: "1.0 0.9 0.95"
+  segment_smis: "CC(=O)N1CC[C@H](C1)O  c1ccc(cc1)CNC=O  c1ccc(cc1)c2cnco2"
 arbiter:
   rules:
   - Glaxo
