@@ -149,8 +149,8 @@ class fitness:
     def _get_ref_mol_segments(self):
         _segment_smis = self._segment_smis
 
-        print("Length of _segment_smis: {}".format(len(_segment_smis)))
-        print("Type of _segment_smis: {}".format(type(_segment_smis)))
+        #print("Length of _segment_smis: {}".format(len(_segment_smis)))
+        #print("Type of _segment_smis: {}".format(type(_segment_smis)))
 
         _segment_mols = []
         unique = True
