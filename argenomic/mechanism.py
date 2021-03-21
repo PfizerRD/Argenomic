@@ -276,8 +276,8 @@ class fitness:
             for k, seg in enumerate(self._segment_smis):
                 print("segment {}: {}".format(k, seg), flush=True)
             
-            print("Length of self._segment_overlays: {}".format(len(self._segment_overlays)), flush=True)
-            print("Type of self._segment_overlays: {}\n".format(type(self._segment_overlays)))
+            #print("Length of self._segment_overlays: {}".format(len(self._segment_overlays)), flush=True)
+            #print("Type of self._segment_overlays: {}\n".format(type(self._segment_overlays)))
 
             if len(self._segment_smis) > 0:
                 print("BEFORE the segment loop.", flush=True)
