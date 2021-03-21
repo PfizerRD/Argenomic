@@ -184,21 +184,21 @@ class fitness:
 
             _segment_mols.append(subRef)
 
-        print("Length of _segment_mols: {}".format(len(_segment_mols)))
-        print("Type of _segment_mols: {}".format(type(_segment_mols)))
+        #print("Length of _segment_mols: {}".format(len(_segment_mols)))
+        #print("Type of _segment_mols: {}".format(type(_segment_mols)))
 
         return _segment_mols
 
     def _calc_segment_overlays(self):
         segment_mols = self._get_ref_mol_segments()
 
-        print("Length of segment_mols (for overlay): {}".format(len(segment_mols)))
-        print("Type of segment_mols (for overlay): {}".format(type(segment_mols)))
+        #print("Length of segment_mols (for overlay): {}".format(len(segment_mols)))
+        #print("Type of segment_mols (for overlay): {}".format(type(segment_mols)))
 
         segment_overlays = self._create_shape_overlays_segments(segment_mols)
 
-        print("Length of segment_overlays: {}".format(len(segment_overlays)))
-        print("Type of segment_overlays: {}".format(type(segment_overlays)))
+        #print("Length of segment_overlays: {}".format(len(segment_overlays)))
+        #print("Type of segment_overlays: {}".format(type(segment_overlays)))
 
         return segment_overlays
 
@@ -260,6 +260,7 @@ class fitness:
                     raise ValueError("Invalid ROCS score type!")
             fitness_score = best_score
 
+            '''
             print("fitness_score before segment penalties: {}".format(fitness_score), flush=True)
 
             print("FINISHED calculating whole Ref overlay.", flush=True)
@@ -275,37 +276,35 @@ class fitness:
 
             for k, seg in enumerate(self._segment_smis):
                 print("segment {}: {}".format(k, seg), flush=True)
-            
-            #print("Length of self._segment_overlays: {}".format(len(self._segment_overlays)), flush=True)
-            #print("Type of self._segment_overlays: {}\n".format(type(self._segment_overlays)))
+            '''
 
             if len(self._segment_smis) > 0:
-                print("BEFORE the segment loop.", flush=True)
+                #print("BEFORE the segment loop.", flush=True)
                 prep = oeshape.OEOverlapPrep()
+                '''
                 print("Created prep object.", flush=True)
                 print("best_index: {}".format(best_index), flush=True)
                 print("type of fit_confs: {}".format(type(fit_confs)), flush=True)
                 print("fit_confs: {}\n".format(fit_confs), flush=True)
-                #print("fit_confs(best_index): {}".format(fit_confs(best_index)), flush=True)
-                #print("type of fit_confs(best_index): {}".format(type(fit_confs(best_index))), flush=True)
+                '''
 
                 for i, fitmol in enumerate(fit_confs):
                     if i == best_index:
                         prep.Prep(fitmol)
-                        print("Added best conf to prep.", flush=True)
+                        #print("Added best conf to prep.", flush=True)
                         
                         for j, seg_overlay in enumerate(self._calc_segment_overlays()):
-                            print("\nSTARTED the segment loop.", flush=True)
-                            print("seg_overlay[{}]:  {}\n".format(j, seg_overlay), flush=True)
+                            #print("\nSTARTED the segment loop.", flush=True)
+                            #print("seg_overlay[{}]:  {}\n".format(j, seg_overlay), flush=True)
                             seg_score = oeshape.OEBestOverlayScore()
-                            print("01. the segment loop.", flush=True)
+                            #print("01. the segment loop.", flush=True)
                             seg_overlay.BestOverlay(seg_score, fitmol, oeshape.OEHighestRefTversky())
-                            print("02. the segment loop.", flush=True)
+                            #print("02. the segment loop.", flush=True)
                             seg_ref_Tversky_score = seg_score.GetRefTversky()
-                            print("03. the segment loop.", flush=True)
-                            print("seg_ref_Tversky_score {}: {}".format(j, seg_ref_Tversky_score), flush=True)
+                            #print("03. the segment loop.", flush=True)
+                            #print("seg_ref_Tversky_score {}: {}".format(j, seg_ref_Tversky_score), flush=True)
 
-                            print("FINISHED calculating seg_ref_Tversky_score.", flush=True)
+                            #print("FINISHED calculating seg_ref_Tversky_score.", flush=True)
 
                             upperbound = 2
 
@@ -317,7 +316,7 @@ class fitness:
                                 fitness_score *= weighted_penalty
                         break
 
-            print("fitness_score after segment penalties: {}".format(fitness_score), flush=True)
+            #print("fitness_score after segment penalties: {}".format(fitness_score), flush=True)
 
         except:
             raise ValueError("Unable to calculate ROCS score!")
