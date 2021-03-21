@@ -72,9 +72,9 @@ class fitness:
             }
             self._ref3d = config.fitness.target
             self._ref_smi = self._get_ref_smi()
-            self._segment_thresholds = config.fitness.thresholds.split()
-            self._segment_penalty_weights = config.fitness.penalty_weights.split()
-            self._segment_smis = config.fitness.segment_smis.split()
+            self._segment_thresholds = config.fitness.thresholds
+            self._segment_penalty_weights = config.fitness.penalty_weights
+            self._segment_smis = config.fitness.segment_smis
         return None
 
     def __call__(self, molecule: Chem.Mol) -> float:
