@@ -1,4 +1,5 @@
 import sys
+import math
 import numpy as np
 import pandas as pd
 from typing import List, Tuple
@@ -234,19 +235,18 @@ class fitness:
                 prep = oeshape.OEOverlapPrep()
                 prep.Prep(fitmol)
                 score = oeshape.OEBestOverlayScore()
-                overlay.BestOverlay(score, fitmol, oeshape.OEHighestRefTverskyCombo())
-                if rocs_type == "shape_only" and score.GetRefTversky() > best_score:
-                    best_score = score.GetRefTversky()
+                overlay.BestOverlay(score, fitmol, oeshape.OEHighestTanimotoCombo())
+                if rocs_type == "shape_only" and score.GetTanimoto() > best_score:
+                    best_score = score.GetTanimoto()
                     best_index = i
-                elif rocs_type == "shape_and_color" and score.GetRefTverskyCombo() > best_score:
-                    best_score = score.GetRefTverskyCombo()
+                elif rocs_type == "shape_and_color" and score.GetTanimotoCombo() > best_score:
+                    best_score = score.GetTanimotoCombo()
                     best_index = i
                 elif rocs_type not in ("shape_only", "shape_and_color"):
                     raise ValueError("Invalid ROCS score type!")
             fitness_score = best_score
 
             if len(self._segment_smis) > 0:
-                #print("BEFORE the segment loop.", flush=True)
                 prep = oeshape.OEOverlapPrep()
 
                 for i, fitmol in enumerate(fit_confs):
@@ -264,7 +264,7 @@ class fitness:
                                 if seg_ref_Tversky_score > upperbound:
                                     seg_ref_Tversky_score = upperbound
                                 penalty = (upperbound - seg_ref_Tversky_score) / (upperbound - self._segment_thresholds[j])
-                                weighted_penalty = self._segment_penalty_weights[j] * penalty
+                                weighted_penalty = math.pow(penalty, self._segment_penalty_weights[j])
                                 fitness_score *= weighted_penalty
                         break
         

@@ -32,8 +32,8 @@ fitness:
   - 0.9
   penalty_weights:
   - 1.0
-  - 0.9
-  - 0.95
+  - 1.15
+  - 1.1
   segment_smis:
   - CC(=O)N1CC[C@H](C1)O
   - c1ccc(cc1)CNC=O
